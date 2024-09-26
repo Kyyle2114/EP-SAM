@@ -3,7 +3,8 @@ warnings.filterwarnings('ignore')
 
 from segment_anything import sam_model_registry
 from segment_anything.utils import *
-from segment_anything.utils import trainer_whole_bbox
+from segment_anything.utils import trainer_dice_iou_point_softmax
+
 import albumentations as A
 
 import torch
@@ -19,6 +20,7 @@ import argparse
 import wandb
 from datetime import datetime
 from torchinfo import summary
+from model import adl_fft_point_softmax
 
 CHECKPOINT_DIR = 'checkpoints'
 os.makedirs(CHECKPOINT_DIR, exist_ok=True)
@@ -41,15 +43,18 @@ def get_args_parser():
     parser.add_argument('--seed', type=int, default=21, help='random seed')
     parser.add_argument('--model_type', type=str, default='vit_b', help='SAM model type')
     parser.add_argument('--checkpoint', type=str, default='sam_vit_b.pth', help='SAM model checkpoint')
+    parser.add_argument('--checkpoint_cls', type=str, default='sam_vit_b.pth', help='Classifier model checkpoint')
     parser.add_argument('--epoch', type=int, default=10, help='total epoch')
     parser.add_argument('--lr', type=float, default=2e-4, help='initial learning rate')
+    parser.add_argument('--dataset_type', type=str, default=0.75, help='pseudo mask dataset option')
     parser.add_argument('--project_name', type=str, default='Fine-tuning-SAM', help='WandB project name')
+    parser.add_argument('--checkpoint_decoder', type=str, default='decoder.pth', help='decoder weight file')
     parser.add_argument('--local_rank', type=int)
-    parser.add_argument('--train_image_dir', type=str, default='dataset/train/image', help='train dataset image dir')
-    parser.add_argument('--train_mask_dir', type=str, default='dataset/train/mask', help='train dataset mask dir')
-    parser.add_argument('--val_image_dir', type=str, default='dataset/val/image', help='valid dataset image dir')
-    parser.add_argument('--val_mask_dir', type=str, default='dataset/val/mask', help='valid dataset mask dir')
     parser.add_argument('--pth_name', type=str)
+    parser.add_argument('--alpha', type=float)
+    parser.add_argument('--gamma', type=int)
+    parser.add_argument('--cuda', type=int)
+    parser.add_argument('--weight', type=int)
     
     return parser
 
@@ -63,18 +68,21 @@ def main(rank, opts) -> str:
     """
     seed.seed_everything(opts.seed)
     
-    set_dist.init_distributed_training(rank, opts)
-    local_gpu_id = opts.gpu
-    
+    # set_dist.init_distributed_training(rank, opts)
+    opts.rank = 0
+    opts.gpu = 0
+    local_gpu_id = opts.gpu + opts.cuda
+
+
     ### checkpoint & WandB set ### 
     run_time = datetime.now()
     run_time = run_time.strftime("%b%d_%H%M%S")
-    file_name = run_time + '.pth'
+    file_name = opts.pth_name + '.pth'
     save_path = os.path.join(CHECKPOINT_DIR, file_name)
     
     if opts.rank == 0:
         wandb.init(project=opts.project_name)
-        wandb.run.name = run_time 
+        wandb.run.name = f'lr{opts.lr}_dice_iou'
 
     ### dataset & dataloader ### 
     # data augmentation for train image & mask 
@@ -87,15 +95,15 @@ def main(rank, opts) -> str:
         ], p=0.5)
     ])
     
+    # opts.dataset_type 
     train_set = dataset.make_dataset(
-        image_dir=opts.train_image_dir,
-        mask_dir=opts.train_mask_dir,
+        image_dir=f'/home/team1/ddrive/team1/sam_dataset/internal_dataset/train/image',
+        mask_dir=f'{opts.dataset_type}',
         transform=transform
     )
-    
     val_set = dataset.make_dataset(
-        image_dir=opts.val_image_dir,
-        mask_dir=opts.val_mask_dir
+        image_dir=f'/home/team1/ddrive/team1/sam_dataset/internal_dataset/val/image',
+        mask_dir=f'/home/team1/ddrive/team1/sam_dataset/internal_dataset/val/mask'
     )
     
     if opts.dist:
@@ -123,7 +131,7 @@ def main(rank, opts) -> str:
 
     sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
     sam.cuda(local_gpu_id)
-    
+
     # set trainable parameters
     for _, p in sam.image_encoder.named_parameters():
         p.requires_grad = False
@@ -149,13 +157,14 @@ def main(rank, opts) -> str:
         model = sam.module
         
     ### training config ###  
-    bceloss = nn.BCELoss().to(local_gpu_id)
-    iouloss = iou_loss_torch.IoULoss().to(local_gpu_id)
+   
+    iouloss = iou_loss_torch.IoULoss()
+    diceloss = dice_loss_torch.DiceLoss()
 
     EPOCHS = opts.epoch
     lr = opts.lr
-    # EarlyStopping : Determined based on the validation loss. Lower is better(mode='min').
-    es = trainer.EarlyStopping(patience=EPOCHS//2, delta=0, mode='min', verbose=True)
+
+    es = trainer_dice_iou_point_softmax.EarlyStopping(patience=10, delta=0, mode='min', verbose=True)
     es_signal = torch.tensor([0]).to(local_gpu_id)
     optimizer = torch.optim.AdamW(
         model.parameters(), 
@@ -171,7 +180,7 @@ def main(rank, opts) -> str:
     if opts.rank == 0:
         wandb.watch(
             models=model,
-            criterion=(bceloss, iouloss),
+            criterion=(diceloss, iouloss),
             log='all',
             log_freq=10
         )
@@ -181,7 +190,7 @@ def main(rank, opts) -> str:
         wandb.run.summary['initial lr'] = lr
         wandb.run.summary['total epoch'] = EPOCHS
     
-    max_loss = np.inf 
+    min_loss = np.Inf
     
     for epoch in range(EPOCHS):
         
@@ -197,23 +206,24 @@ def main(rank, opts) -> str:
             train_sampler.set_epoch(epoch)
         
         ### model train / validation ###
-        train_bce_loss, train_iou_loss, train_dice, train_iou = trainer_whole_bbox.model_train(
+        train_dice_loss, train_iou_loss, train_dice, train_iou = trainer_dice_iou_point_softmax.model_train(
             model=model,
             data_loader=train_loader,
-            criterion=[bceloss, iouloss],
+            criterion=[diceloss, iouloss],
             optimizer=optimizer,
             device=local_gpu_id,
+            weight=opts.weight,
             scheduler=scheduler
         )
         
         if opts.dist:
             dist.barrier()
             
-            dist.all_reduce(train_bce_loss, op=dist.ReduceOp.SUM)            
-            train_bce_loss = train_bce_loss.item() / dist.get_world_size()
-            
             dist.all_reduce(train_iou_loss, op=dist.ReduceOp.SUM)            
             train_iou_loss = train_iou_loss.item() / dist.get_world_size()
+            
+            dist.all_reduce(train_dice, op=dist.ReduceOp.SUM)
+            train_dice_loss = train_dice_loss.item() / dist.get_world_size()
             
             dist.all_reduce(train_dice, op=dist.ReduceOp.SUM)
             train_dice = train_dice.item() / dist.get_world_size()
@@ -222,25 +232,39 @@ def main(rank, opts) -> str:
             train_iou = train_iou.item() / dist.get_world_size()
             
         if not opts.dist:
-            train_bce_loss = train_bce_loss.item()
             train_iou_loss = train_iou_loss.item()
+            train_dice_loss = train_dice_loss.item()
+
             train_dice = train_dice.item()
             train_iou = train_iou.item()
+            
         
         if opts.rank == 0:
-            val_bce_loss, val_iou_loss, val_dice, val_iou = trainer_whole_bbox.model_evaluate(
+            # Classifier
+            cls = adl_fft_point_softmax.resnet50_adl(
+                architecture_type='adl', 
+                pretrained=False, 
+                adl_drop_rate=0.75, 
+                adl_drop_threshold=0.8
+            ).to(device=f"cuda:{local_gpu_id}")
+            cls.load_state_dict(torch.load(f'{opts.checkpoint_cls}', map_location=f"cuda:{local_gpu_id}"))
+            cls.eval()
+
+            val_dice_loss, val_iou_loss, val_dice, val_iou = trainer_dice_iou_point_softmax.model_evaluate(
                 model=model,
+                cls=cls,
                 data_loader=val_loader,
-                criterion=[bceloss, iouloss],
+                criterion=[diceloss, iouloss],
+                weight=opts.weight,
                 device=f"cuda:{local_gpu_id}"
             )
             
-            val_loss = val_bce_loss + val_iou_loss
+            val_loss = val_dice_loss + val_iou_loss
             
             wandb.log(
                 {
-                    'Train BCE Loss': train_bce_loss,
                     'Train IoU Loss': train_iou_loss,
+                    'Train DICE Loss': train_dice_loss,
                     'Train Dice Metric': train_dice,
                     'Train IoU Metric': train_iou
                 }, step=epoch+1
@@ -248,8 +272,8 @@ def main(rank, opts) -> str:
         
             wandb.log(
                 {
-                    'Validation BCE Loss': val_bce_loss,
                     'Validation IoU Loss': val_iou_loss,
+                    'Validation DICE Loss': val_dice_loss,
                     'Validation Dice Metric': val_dice,
                     'Validation IoU Metric': val_iou
                 }, step=epoch+1
@@ -262,14 +286,14 @@ def main(rank, opts) -> str:
                 continue
         
             ### Save best model ###
-            if val_loss < max_loss:
-                print(f'[INFO] val_loss has been improved from {max_loss:.5f} to {val_loss:.5f}. Save model.')
-                max_loss = val_loss
+            if val_loss < min_loss:
+                print(f'[INFO] val_loss has been improved from {min_loss:.5f} to {val_loss:.5f}. Save model.')
+                min_loss = val_loss
                 _ = save_weight.save_partial_weight(model=sam, save_path=save_path)
             
             ### print current loss / metric ###
-            print(f'epoch {epoch+1:02d}, bce_loss: {train_bce_loss:.5f}, iou_loss: {train_iou_loss:.5f}, dice: {train_dice:.5f}, iou: {train_iou:.5f},', end=' ')
-            print(f'val_bce_loss: {val_bce_loss:.5f}, val_iou_loss: {val_iou_loss:.5f}, val_dice: {val_dice:.5f}, val_iou: {val_iou:.5f} \n')
+            print(f'epoch {epoch+1:02d}, dice_loss: {train_dice_loss:.5f}, iou_loss: {train_iou_loss:.5f}, dice: {train_dice:.5f}, iou: {train_iou:.5f} \n')
+            print(f'val_dice_loss: {val_dice_loss:.5f}, val_iou_loss: {val_iou_loss:.5f}, val_dice: {val_dice:.5f}, val_iou: {val_iou:.5f} \n')
     
     print(f'Model checkpoint saved at: {save_path} \n') 
     

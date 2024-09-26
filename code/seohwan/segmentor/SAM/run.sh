@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 run_various_thresh_dice_iou_softmax.py \
+python3 run.py \
     --batch_size 4 \
     --port 1234 \
     --dist False \
