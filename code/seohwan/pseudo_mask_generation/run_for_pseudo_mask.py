@@ -9,12 +9,10 @@ import argparse
 import torch 
 from torch.utils.data import DataLoader
 import torchvision.transforms as tr
-from model.backbone import resnet50
 
-from adl import adl_fft_internel_point_softmax, adl_internel_point_softmax
+from adl import adl_fft_internel_point_softmax
 from generate_mask_for_train_fft_point_softmax import make_point_mask
 from mask_compare_point import compare_mask
-from model import basic_classifier_thres_2
 
 def get_args_parser():
     parser = argparse.ArgumentParser(add_help=False)
@@ -69,31 +67,6 @@ def main(opts):
             adl_drop_rate=0.75, 
             adl_drop_threshold=0.8
         ).to(device)
-        cls.load_state_dict(torch.load(f'{opts.checkpoint_cls}', map_location=device))
-        cls.eval()
-        
-        for p in cls.parameters():
-            p.requires_grad = False
-            
-    elif opts.cam_type == 'adl':
-        cls = adl_internel_point_softmax.resnet50_adl(
-            architecture_type='adl', 
-            pretrained=False, 
-            adl_drop_rate=0.75, 
-            adl_drop_threshold=0.8
-        ).to(device)
-        cls.load_state_dict(torch.load(f'{opts.checkpoint_cls}', map_location=device))
-        cls.eval()
-        
-    else:
-        resnet = resnet50.ResNet50(pretrain=False)
-
-        cls = basic_classifier_thres_2.BasicClassifier(
-            model=resnet, 
-            in_features=resnet.in_features,
-            freezing=True, 
-            num_classes=1
-        ).to(device=device)
         cls.load_state_dict(torch.load(f'{opts.checkpoint_cls}', map_location=device))
         cls.eval()
         

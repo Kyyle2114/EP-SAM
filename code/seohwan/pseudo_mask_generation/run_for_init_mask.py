@@ -11,8 +11,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as tr 
 
 from model.backbone import resnet50
-from adl import adl_fft_thres, adl_thres, adl_fft_internel_point_softmax_crf
-from model import basic_classifier_thres_2
+from adl import adl_fft_thres
 from compare_mask_cam_and_gt import make_mask
 
 def get_args_parser():
@@ -40,7 +39,7 @@ def main(opts):
     After evaluation, print results 
     """
     seed.seed_everything(opts.seed)
-    device = f'cuda:0' if torch.cuda.is_available() else 'cpu'
+    device = f'cuda:1' if torch.cuda.is_available() else 'cpu'
     
     ### dataset & dataloader ### 
 
@@ -60,7 +59,7 @@ def main(opts):
     
     # Classifier
     if opts.model_type == 'adl_fft':
-        cls = adl_fft_internel_point_softmax_crf.resnet50_adl(
+        cls = adl_fft_thres.resnet50_adl(
             architecture_type='adl', 
             pretrained=False, 
             adl_drop_rate=0.75, 
@@ -71,37 +70,6 @@ def main(opts):
         
         for p in cls.parameters():
             p.requires_grad = False
-    
-    elif opts.model_type == 'adl':
-        cls = adl_thres.resnet50_adl(
-            architecture_type='adl', 
-            pretrained=False, 
-            adl_drop_rate=0.75, 
-            adl_drop_threshold=0.8
-        ).to(device)
-        cls.load_state_dict(torch.load(f'{opts.checkpoint_cls}', map_location=device))
-        cls.eval()
-        
-        for p in cls.parameters():
-            p.requires_grad = False
-
-
-    # elif opts.model_type == 'gradcamplpl':
-    else:
-        resnet = resnet50.ResNet50(pretrain=False)
-
-        cls = basic_classifier_thres_2.BasicClassifier(
-            model=resnet, 
-            in_features=resnet.in_features,
-            freezing=True, 
-            num_classes=1
-        ).to(device=device)
-        cls.load_state_dict(torch.load(f'{opts.checkpoint_cls}', map_location=device))
-        cls.eval()
-        
-        for p in cls.parameters():
-            p.requires_grad = False
-
     
     ### Mask generation phase ### 
     

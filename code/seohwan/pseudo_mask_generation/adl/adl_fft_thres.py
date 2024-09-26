@@ -235,15 +235,15 @@ class ResNetAdl(nn.Module):
         # thresholding
         non_zero_values = avg_cam[avg_cam != 0]
         # avg_cam = cv2.resize(avg_cam, (image.size[0], image.size[1])) 
-        # if len(non_zero_values) > 0:
-        #     percentile_thres = np.percentile(non_zero_values, 30)
-        #     avg_cam = np.where(avg_cam > percentile_thres, 1, 0).astype(np.uint8)
-        # else:
-        #     avg_cam = np.zeros_like(avg_cam, dtype=np.uint8)
+        if len(non_zero_values) > 0:
+            percentile_thres = np.percentile(non_zero_values, 20)
+            avg_cam = np.where(avg_cam > percentile_thres, 1, 0).astype(np.uint8)
+        else:
+            avg_cam = np.zeros_like(avg_cam, dtype=np.uint8)
         
-        # # opening     
-        # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-        # avg_cam = cv2.morphologyEx(avg_cam, cv2.MORPH_OPEN, kernel)
+        # opening     
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+        avg_cam = cv2.morphologyEx(avg_cam, cv2.MORPH_OPEN, kernel)
         avg_cam = cv2.resize(avg_cam, (image.size[0], image.size[1])) 
         # upscaling 
         avg_cam[avg_cam != 0] = 1

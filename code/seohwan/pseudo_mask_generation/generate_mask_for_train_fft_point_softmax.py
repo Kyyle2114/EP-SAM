@@ -6,13 +6,11 @@ import numpy as np
 from tqdm import tqdm 
 import os 
 from PIL import Image 
-from segment_anything.utils.fft import extract_freq_components
+
 from segment_anything.utils.transforms import ResizeLongestSide
 from segment_anything.utils.metrics import Dice, IoU
 from segment_anything.utils.make_prompt import *
 
-from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
-from pytorch_grad_cam import GradCAMPlusPlus, LayerCAM, GradCAM, EigenCAM
 
 def make_point_mask(
     sam,
@@ -21,7 +19,6 @@ def make_point_mask(
     output_path,
     pmask_dir,
     device,
-    cam_type
 ) -> pd.DataFrame:
     """
     Make pseudo mask using CAM & SAM 
@@ -45,9 +42,6 @@ def make_point_mask(
     os.makedirs(save_cam_dir, exist_ok=True)
     
     sam.eval()
-    # cls.eval()
-    
-    # with torch.no_grad():
         
     transform = ResizeLongestSide(target_length=sam.image_encoder.img_size)
     
@@ -77,61 +71,7 @@ def make_point_mask(
             if logit.item() >= 0:
                 original_size = image.shape[1:3]
                 
-                if cam_type == 'adl' or cam_type == 'adl_fft': 
-                    cam_mask, normalized_cam = cls.make_cam(to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()), morphology=True, device=device)
-                elif cam_type == 'gradcamplpl':
-                    for p in cls.parameters():
-                        p.requires_grad = True
-
-                    for p in cls.backbone[:-1].parameters():
-                        p.requires_grad = False
-
-                    for p in cls.backbone[-1][:-1].parameters():
-                        p.requires_grad = False
-                    
-                    target_layers = [cls.backbone[-1][-1]]
-                    targets = [ClassifierOutputTarget(0)]
-                    gradcamplpl = GradCAMPlusPlus(model=cls, target_layers=target_layers)                    
-                    cam_mask, normalized_cam = cls.make_cam(to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()), morphology=True, device=device, cam=gradcamplpl, targets=targets, cls=cls)
-                    
-                elif cam_type == 'gradcam':
-                    for p in cls.parameters():
-                        p.requires_grad = True
-
-                    for p in cls.backbone[:-1].parameters():
-                        p.requires_grad = False
-
-                    for p in cls.backbone[-1][:-1].parameters():
-                        p.requires_grad = False
-                        
-                    target_layers = [cls.backbone[-1][-1]]
-                    targets = [ClassifierOutputTarget(0)]
-                    gradcam = GradCAM(model=cls, target_layers=target_layers)                    
-                    cam_mask, normalized_cam = cls.make_cam(to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()), morphology=True, device=device, cam=gradcam, targets=targets, cls=cls)
-                    
-                elif cam_type == 'layercam':
-                    for p in cls.parameters():
-                        p.requires_grad = True   
-                    
-                    target_layers_for_layercam = [cls.backbone[-4][-1], cls.backbone[-3][-1], cls.backbone[-2][-1], cls.backbone[-1][-1]]
-                    targets = [ClassifierOutputTarget(0)]
-                    layercam = LayerCAM(model=cls, target_layers=target_layers_for_layercam) 
-                    cam_mask, normalized_cam = cls.make_cam(to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()), morphology=True, device=device, cam=layercam, targets=targets, cls=cls)
-                    
-                elif cam_type == 'eigencam':
-                    for p in cls.parameters():
-                        p.requires_grad = True
-
-                    for p in cls.backbone[:-1].parameters():
-                        p.requires_grad = False
-
-                    for p in cls.backbone[-1][:-1].parameters():
-                        p.requires_grad = False
-                    
-                    target_layers = [cls.backbone[-1][-1]]
-                    targets = [ClassifierOutputTarget(0)]
-                    eigencam = EigenCAM(model=cls, target_layers=target_layers)
-                    cam_mask, normalized_cam = cls.make_cam(to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()), morphology=True, device=device, cam=eigencam, targets=targets, cls=cls)
+                cam_mask, normalized_cam = cls.make_cam(to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()), morphology=True, device=device)
 
                 # SAM input 
                 image = transform.apply_image(image)
@@ -139,12 +79,11 @@ def make_point_mask(
                 image = image.permute(2, 0, 1).contiguous()
 
                 point_coords = make_proba_point_prompt(softmax_cam=normalized_cam, cam_mask=cam_mask, n_point=50)
-                # point_coords = make_weighted_proba_point_prompt(softmax_cam=softmax_cam, cam_mask=cam_mask, n_point=50)
+
                 point_label = np.ones(shape=len(point_coords))
                 coords_torch = torch.as_tensor(point_coords, dtype=torch.float, device=device)
                 labels_torch = torch.as_tensor(point_label, dtype=torch.float, device=device)
                 coords_torch, labels_torch = coords_torch[None, :, :], labels_torch[None, :]
-
 
                 batched_input.append(
                     {

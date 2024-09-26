@@ -28,26 +28,6 @@ class CustomDataset(Dataset):
     
     def __len__(self):
         return len(self.pmasks)
-    # def __init__(self, mask_dir, pmask_dir):
-    #     self.mask_dir = mask_dir
-    #     self.pmask_dir = pmask_dir
-    #     self.pmasks = os.listdir(pmask_dir)
-        
-    # def __getitem__(self, idx):
-        
-    #     mask_path = os.path.join(self.mask_dir, self.pmasks[idx])
-    #     pmask_path = os.path.join(self.pmask_dir, self.pmasks[idx])  
-
-    #     mask = cv2.imread(mask_path)
-    #     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
-        
-    #     pmask = cv2.imread(pmask_path)
-    #     pmask = cv2.cvtColor(pmask, cv2.COLOR_BGR2RGB)
-        
-    #     return mask[..., 0], pmask[..., 0]
-    
-    # def __len__(self):
-    #     return len(self.pmasks)
     
 def make_dataset(
     mask_dir: str,
