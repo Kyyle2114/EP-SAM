@@ -1,18 +1,16 @@
 
 """
-Original repository: https://github.com/junsukchoe/ADL
+referenced repository : https://github.com/junsukchoe/ADL
 """
-
 import torch
 import torch.nn as nn
 from torchvision.transforms.functional import pil_to_tensor
-from .fft import extract_freq_components
 
 import numpy as np 
 import cv2 
-
 from PIL import Image
-from typing import Tuple 
+
+from .fft import extract_freq_components
 
 __all__ = ['ADL']
 
@@ -123,11 +121,14 @@ class ResNetAdl(nn.Module):
         initialize_weights(self.modules(), init_mode='xavier')
 
     def forward(self, x, labels=None, return_cam=False):
+
+        # Extract high-frequency components
         high_freq = extract_freq_components(x)
         high_freq_mean = high_freq.mean(dim=1, keepdim=True)
-
-        x_combined = torch.cat((x, high_freq_mean), dim=1)
-        x = self.conv1(x_combined)
+        
+        X_combined = torch.cat((x, high_freq_mean), dim=1)
+  
+        x = self.conv1(X_combined)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
@@ -163,7 +164,7 @@ class ResNetAdl(nn.Module):
         for _ in range(1, blocks):
             layers.append(block(self.inplanes, planes))
         return layers
-    
+
     def _rotate(self, x: Image, angle: int) -> Image:
         
         return x.rotate(angle, expand=True)
@@ -172,7 +173,8 @@ class ResNetAdl(nn.Module):
         
         return np.rot90(x, k=(4 - angle) // 90)
     
-    def _normalize_minmax(self, x):
+    def _normalize_minmax(self, x: np.array) -> np.array:
+        
         return (x - np.min(x)) / (np.max(x) - np.min(x) + 1e-8) 
     
     def make_cam(
@@ -230,43 +232,26 @@ class ResNetAdl(nn.Module):
         avg_cam = np.uint8(avg_cam)
 
         normalized_cam = self._normalize_minmax(avg_cam)
-
         normalized_cam = cv2.resize(normalized_cam, (image.size[0], image.size[1]))
         normalized_cam = normalized_cam.astype(np.float32)
+        
         non_zero_values = avg_cam[avg_cam != 0]
         
         if len(non_zero_values) > 0:
             percentile_thres = np.percentile(non_zero_values, 20)
             avg_cam = np.where(avg_cam > percentile_thres, 1, 0).astype(np.uint8)
+            
         else:
             avg_cam = np.zeros_like(avg_cam, dtype=np.uint8)
 
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5, 5))
         avg_cam = cv2.morphologyEx(avg_cam, cv2.MORPH_OPEN, kernel)
-        
         avg_cam = cv2.resize(avg_cam, (image.size[0], image.size[1]), cv2.INTER_LANCZOS4) 
 
         avg_cam[avg_cam != 0] = 1
                 
         return avg_cam, normalized_cam
     
-    def make_bbox(self, mask: np.array) -> np.array:
-        
-        non_zero_points = cv2.findNonZero(mask)
-        
-        if non_zero_points is not None:
-            x, y, w, h = cv2.boundingRect(non_zero_points)
-            
-            return np.array((x, y, x + w - 1, y + h - 1))
-        
-        else:
-            
-            return np.array((0, 0, 0, 0))
-        
-    def make_whole_bbox(self, image: np.array) -> np.array:
-        
-        return np.array((0, 0, image.shape[0], image.shape[1]))
-
 def initialize_weights(modules, init_mode):
     for m in modules:
         if isinstance(m, nn.Conv2d):
@@ -318,6 +303,5 @@ def get_downsampling_layer(inplanes, block, planes, stride):
 
 def resnet50_adl(architecture_type, pretrained=False, pretrained_path=None, **kwargs):
     model = {'adl': ResNetAdl}[architecture_type](Bottleneck, [3, 4, 6, 3], **kwargs)
-    if pretrained:
-        model = load_pretrained_model(model, architecture_type, path=pretrained_path, **kwargs)
+    
     return model
