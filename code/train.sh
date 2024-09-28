@@ -9,11 +9,19 @@ TEST_IMAGE_DIR=dataset/$DATASET_TYPE/test/image
 python3 1_train_patch_classifier.py \
     --train_image_dir $TRAIN_IMAGE_DIR \
     --val_image_dir $VAL_IMAGE_DIR \
-    --test_image_dir $TEST_IMAGE_DIR \ >> logging.txt 
+    --test_image_dir $TEST_IMAGE_DIR \
+    >> logging.txt
 
 # initial mask generation 
-python3 2_initial_mask_generation.py
+python3 2_generate_initial_mask.py \
+    --dataset_type $DATASET_TYPE \
+    --train_image_dir $train_image_dir \
+    >> logging.txt
 
-# sam mask generation 
-python3 3_sam_mask_generation.py
+# preliminary mask decoder fine-tuning
+python3 3_preliminary_fine_tuning.py
+
+
+# iterative re-training
+python3 4_iterative_re_training.py
 

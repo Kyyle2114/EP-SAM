@@ -43,10 +43,10 @@ def main(opts):
     
 if __name__ == '__main__': 
     
-    parser = argparse.ArgumentParser('Data Preprocessing', parents=[get_args_parser()])
+    parser = argparse.ArgumentParser('Iterative Re-Training', parents=[get_args_parser()])
     opts = parser.parse_args()
     
-    print('Data Preprocessing')
+    print('Iterative Re-Training')
     
     main(opts)
     

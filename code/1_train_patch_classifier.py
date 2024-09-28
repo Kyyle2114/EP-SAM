@@ -1,5 +1,4 @@
 import warnings
-
 warnings.filterwarnings('ignore')
 
 import argparse
@@ -15,9 +14,6 @@ from torchinfo import summary
 from tools import seed, dataset, classifier_trainer
 from patch_classifier import resnet_adl
 
-CHECKPOINT_DIR = 'checkpoints'
-os.makedirs(CHECKPOINT_DIR, exist_ok=True)
-
 def get_args_parser():
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('--batch_size', type=int, default=16, help='batch size allocated to GPU')
@@ -26,9 +22,9 @@ def get_args_parser():
     parser.add_argument('--epoch', type=int, default=50, help='total epoch')
     parser.add_argument('--lr', type=float, default=1e-5, help='initial learning rate')
     parser.add_argument('--weight_decay', type=float, default=1e-3, help='weight decay')
-    parser.add_argument('--train_image_dir', type=str, default='dataset/train/image', help='train dataset image dir')
-    parser.add_argument('--val_image_dir', type=str, default='dataset/val/image', help='valid dataset image dir')
-    parser.add_argument('--test_image_dir', type=str, default='dataset/test/image', help='test dataset image dir')
+    parser.add_argument('--train_image_dir', type=str, default='dataset/camelyon17/train/image', help='train dataset image dir')
+    parser.add_argument('--val_image_dir', type=str, default='dataset/camelyon17/val/image', help='valid dataset image dir')
+    parser.add_argument('--test_image_dir', type=str, default='dataset/camelyon17/test/image', help='test dataset image dir')
     
     return parser
 
@@ -43,8 +39,10 @@ def main(opts):
     seed.seed_everything(opts.seed)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
+    checkpoint_dir = 'checkpoints'
     file_name = 'resnet_adl.pth'
-    save_best_path = os.path.join(CHECKPOINT_DIR, file_name)
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    save_best_path = os.path.join(checkpoint_dir, file_name)
     
     ### dataset & dataloader ### 
     
@@ -60,17 +58,17 @@ def main(opts):
         ]
     )
 
-    train_set = dataset.make_classifier_dataset(
+    train_set = dataset.ClassifierDataset(
         image_dir=opts.train_image_dir,
         transform=transform
     )
 
-    val_set = dataset.make_classifier_dataset(
+    val_set = dataset.ClassifierDataset(
         image_dir=opts.val_image_dir,
         transform=tr.Compose([tr.Resize(opts.patch_size), tr.ToTensor()])
     )
     
-    test_set = dataset.make_classifier_dataset(
+    test_set = dataset.ClassifierDataset(
         image_dir=opts.test_image_dir,
         transform=tr.Compose([tr.Resize(opts.patch_size), tr.ToTensor()])
     )
@@ -158,7 +156,7 @@ def main(opts):
         
     ### Evaluation phase ### 
     
-    model.load_state_dict(torch.load(f'{opts.checkpoint_dir}', map_location=device))
+    model.load_state_dict(torch.load(save_best_path, map_location=device))
     model.eval()
     
     for p in model.parameters():
@@ -183,6 +181,8 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser('Training Patch Classifier', parents=[get_args_parser()])
     opts = parser.parse_args()
+    
+    print('=== Training Patch Classifier ===')
     
     main(opts)
     

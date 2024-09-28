@@ -1,12 +1,22 @@
 import os
+import numpy as np 
 from PIL import Image
 from typing import Type
 
 import torch
 from torch.utils.data import Dataset
+import torchvision.transforms as tr 
+import cv2
 
-class CustomClassifierDataset(Dataset):
+class ClassifierDataset(Dataset):
     def __init__(self, image_dir, transform):
+        """
+        Make pytorch Dataset for given task.
+
+        Args:
+            image_dir (str): dataset directory
+            transform (torchvision.transforms) pytorch image transforms  
+        """
         self.image_dir = image_dir
         self.data_images = os.listdir(image_dir)
         self.labels = []
@@ -31,8 +41,46 @@ class CustomClassifierDataset(Dataset):
     def __len__(self):
         return len(self.data_images)
     
-class CustomSegmenterDataset(Dataset):
-    def __init__(self, image_dir, transform):
+class InitialMaskDataset(Dataset):
+    def __init__(self, image_dir, transform=None):
+        """
+        Make pytorch Dataset for given task.
+
+        Args:
+            image_dir (str): dataset directory
+            transform (torchvision.transforms) pytorch image transforms  
+        """
+        self.image_dir = image_dir
+        # for positive patches 
+        self.data_images = [x for x in os.listdir(image_dir) if int(x[:-4].split('_')[-1]) == 1]        
+        self.transform = transform
+
+    def __getitem__(self, idx):
+        file_name = self.data_images[idx]
+        img_path = os.path.join(self.image_dir, self.data_images[idx])
+        
+        image = cv2.imread(img_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        if self.transform:
+            image = self.transform(image)
+
+        return image, file_name
+    
+    def __len__(self):
+        return len(self.data_images)
+    
+class SegmenterDataset(Dataset):
+    def __init__(self, image_dir, mask_dir, transform):
+        """
+        Make pytorch Dataset for given task.
+        Read the image using the PIL library and return it as an np.array.
+
+        Args:
+            image_dir (str): dataset directory
+            mask_dir (str): dataset directory
+            transform (torchvision.transforms) pytorch image transforms  
+        """
         self.image_dir = image_dir
         self.data_images = os.listdir(image_dir)
         self.labels = []
@@ -56,49 +104,3 @@ class CustomSegmenterDataset(Dataset):
     
     def __len__(self):
         return len(self.data_images)
-    
-def make_classifier_dataset(
-    image_dir: str,
-    transform=None
-) -> Type[torch.utils.data.Dataset]:
-    """
-    Make pytorch Dataset for given task.
-    Read the image using the PIL library and return it as an np.array.
-
-    Args:
-        image_dir (str): dataset directory
-        transform (torchvision.transforms) pytorch image transforms  
-
-    Returns:
-        torch.Dataset: pytorch Dataset
-    """
-        
-    dataset = CustomClassifierDataset(
-        image_dir=image_dir,
-        transform=transform
-    )
-            
-    return dataset
-    
-def make_segmenter_dataset(
-    image_dir: str,
-    transform=None
-) -> Type[torch.utils.data.Dataset]:
-    """
-    Make pytorch Dataset for given task.
-    Read the image using the PIL library and return it as an np.array.
-
-    Args:
-        image_dir (str): dataset directory
-        transform (torchvision.transforms) pytorch image transforms  
-
-    Returns:
-        torch.Dataset: pytorch Dataset
-    """
-        
-    dataset = CustomSegmenterDataset(
-        image_dir=image_dir,
-        transform=transform
-    )
-            
-    return dataset

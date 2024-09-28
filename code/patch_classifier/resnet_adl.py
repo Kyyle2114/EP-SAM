@@ -1,6 +1,6 @@
 
 """
-referenced repository : https://github.com/junsukchoe/ADL
+Code Reference: https://github.com/junsukchoe/ADL
 """
 import torch
 import torch.nn as nn
@@ -9,6 +9,7 @@ from torchvision.transforms.functional import pil_to_tensor
 import numpy as np 
 import cv2 
 from PIL import Image
+from typing import Tuple
 
 from .fft import extract_freq_components
 
@@ -177,19 +178,20 @@ class ResNetAdl(nn.Module):
         
         return (x - np.min(x)) / (np.max(x) - np.min(x) + 1e-8) 
     
-    def make_cam(
+    def generate_cam_masks(
         self,
         image: Image,
         device: str
-    ) -> np.array:
+    ) -> Tuple[np.array, np.array]:
         """
         Make CAM with rotation & morphologyEx
 
         Args:
-            x (PIL.Image): input image 
+            image (PIL.Image): input image 
+            device (str): device
 
         Returns:
-            np.array: upscaled mask
+            Tupe[np.array, np.array]: cam mask, normalized cam mask
         """
         angles = [0, 90, 180, 270]
         cams = [] 
@@ -198,8 +200,8 @@ class ResNetAdl(nn.Module):
         for angle in angles:
             x = self._rotate(image, angle)
             x = pil_to_tensor(x).float().unsqueeze(0).div(255).to(device)
+            
             with torch.no_grad():
-
                 # Extract high-frequency components
                 high_freq = extract_freq_components(x)
                 high_freq_mean = high_freq.mean(dim=1, keepdim=True)
