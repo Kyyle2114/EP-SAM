@@ -13,7 +13,7 @@ def generate_initial_mask(
     data_loader,
     output_path,
     device
-) -> pd.DataFrame:
+):
     """
     Make pseudo mask using CAM & SAM 
 
@@ -22,9 +22,6 @@ def generate_initial_mask(
         data_loader (torch.DataLoader): pytorch dataloader
         output_path (str): save path 
         device (str): device 
-
-    Returns:
-        pd.DataFrame: result csv file 
     """
     save_dir = f'{output_path}/initial_mask'
     os.makedirs(save_dir, exist_ok=True)

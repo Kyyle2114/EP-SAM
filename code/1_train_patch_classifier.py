@@ -44,7 +44,7 @@ def main(opts):
     os.makedirs(checkpoint_dir, exist_ok=True)
     save_best_path = os.path.join(checkpoint_dir, file_name)
     
-    ### dataset & dataloader ### 
+    ### Dataset & Dataloader ### 
     
     transform = tr.Compose(
         [
@@ -111,7 +111,7 @@ def main(opts):
     summary(model)
     print()
     
-    ### loss & metric config ###  
+    ### Loss & metric config ###  
     
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=opts.lr, weight_decay=opts.weight_decay)
@@ -139,7 +139,7 @@ def main(opts):
             device=device
         )
         
-        # Early Stop Check
+        # check EarlyStopping
         es(val_loss)
 
         # Save best model 
@@ -148,7 +148,7 @@ def main(opts):
             max_loss = val_loss
             torch.save(model.state_dict(), save_best_path)
         
-        # Print loss & accuracy 
+        # print loss & accuracy 
         print(f'epoch {epoch+1:02d}, loss: {train_loss:.5f}, accuracy: {train_acc:.5f}, val_loss: {val_loss:.5f}, val_accuracy: {val_acc:.5f} \n')
         
         if es.early_stop:

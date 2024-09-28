@@ -15,7 +15,7 @@ def get_args_parser():
     parser.add_argument('--batch_size', type=int, default=16, help='batch size allocated to GPU')
     parser.add_argument('--patch_size', type=int, default=512, help='size of each WSI patch')
     parser.add_argument('--dataset_type', type=str, default='camelyon17', choices=['camelyon16', 'camelyon17'], help='dataset type')
-    parser.add_argument('--seed', type=int, default=22, help='random seed')
+    parser.add_argument('--seed', type=int, default=21, help='random seed')
     parser.add_argument('--train_image_dir', type=str, default='dataset/camelyon17/train/image', help='train dataset image dir')
     
     return parser
@@ -31,7 +31,7 @@ def main(opts):
     seed.seed_everything(opts.seed)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
-    ### dataset & dataloader ### 
+    ### Dataset & Dataloader ### 
     
     train_set = dataset.InitialMaskDataset(
         image_dir=opts.train_image_dir,
@@ -65,7 +65,7 @@ def main(opts):
     generate_initial_mask(
         classifier=cls,
         DataLoader=train_loader,
-        output_path=f'dataset/{opts.dataset_type}',
+        output_path=f'dataset/{opts.dataset_type}/train',
         device=device
     )
     
