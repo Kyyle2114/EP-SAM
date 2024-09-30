@@ -26,7 +26,6 @@ def main(opts):
     
     Args:
         opts (argparser): argparser
-        
     """
     seed.seed_everything(opts.seed)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -62,9 +61,9 @@ def main(opts):
     
     ### Generate initial mask ### 
     
-    generate_initial_mask(
+    generate_initial_mask.generate_initial_mask(
         classifier=cls,
-        DataLoader=train_loader,
+        data_loader=train_loader,
         output_path=f'dataset/{opts.dataset_type}/train',
         device=device
     )
@@ -76,7 +75,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser('Generate Initial Mask', parents=[get_args_parser()])
     opts = parser.parse_args()
     
-    print('Generate Initial Mask')
+    print('=== Generate Initial Mask ===')
     
     main(opts)
     

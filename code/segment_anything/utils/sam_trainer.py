@@ -16,7 +16,7 @@ def model_train(
     optimizer,        
     device,
     scheduler
-) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+) -> Tuple[float, float, float, float]:
     """
     Train the model
 
@@ -29,7 +29,7 @@ def model_train(
         scheduler (torch.optim.lr_scheduler): pytorch learning rate scheduler 
 
     Returns:
-        Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]: average losses(bce, iou), metrics(dice, iou)
+        Tuple[float, float, float, float]: average losses(dice, iou), metrics(dice, iou)
     """
     
     # Training
@@ -160,7 +160,7 @@ def model_evaluate(
         device (str): device 
 
     Returns:
-        Tuple[float, float, float, float]: average losses(bce, iou), metrics(dice, iou)
+        Tuple[float, float, float, float]: average losses(dice, iou), metrics(dice, iou)
     """
 
     # Evaluation

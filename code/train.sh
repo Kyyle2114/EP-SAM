@@ -40,5 +40,11 @@ python3 3_preliminary_fine_tuning.py \
 
 # iterative re-training
 python3 4_iterative_re_training.py \
-    --n_iter 3
+    --n_iter 3 \
+    --sam_model_type $SAM_MODEL_TYPE \
+    --sam_checkpoint $SAM_CHECKPOINT \
+    --train_dataset_dir $TRAIN_DATASET_DIR \
+    --val_dataset_dir $VAL_DATASET_DIR \
+    --test_dataset_dir $TEST_DATASET_DIR \
+    >> logging.txt
 

@@ -13,7 +13,7 @@ import albumentations as A
 from segment_anything import sam_model_registry
 from segment_anything.utils import sam_trainer
 
-from tools import seed, dataset, losses, save_weight
+from tools import seed, dataset, losses, save_weight, generate_sam_mask
 from patch_classifier import resnet_adl
 
 CHECKPOINT_DIR = 'checkpoints'
@@ -46,7 +46,6 @@ def main(opts):
 
     checkpoint_dir = 'checkpoints'
     file_name = 'sam_pre_decoder.pth'
-    os.makedirs(checkpoint_dir, exist_ok=True)
     save_best_path = os.path.join(checkpoint_dir, file_name)
     
     ### Dataset & Dataloader ### 
@@ -149,7 +148,7 @@ def main(opts):
 
         val_dice_loss, val_iou_loss, val_dice, val_iou = sam_trainer.model_evaluate(
             model=sam,
-            cls=cls,
+            classifier=cls,
             data_loader=val_loader,
             criterion=[diceloss, iouloss],
             device=device
@@ -172,10 +171,26 @@ def main(opts):
         
         if es.early_stop:
             break    
-    
-    print(f'Model checkpoint saved at: {save_best_path} \n') 
-    
+        
     ### Generate pseudo masks ###
+    
+    sam = save_weight.load_partial_weight(
+        model=sam,
+        load_path=save_best_path
+    )
+    
+    sam.eval()
+    for p in sam.parameters():
+        p.requires_grad = False
+    
+    generate_sam_mask.generate_sam_mask(
+        sam=sam,
+        classifier=cls,
+        data_loader=train_loader,
+        output_path=f'{opts.train_dataset_dir}',
+        iter=0,
+        device=device
+    )
     
     return
 
@@ -184,7 +199,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser('Preliminary Mask Decoder Fine-Tuning', parents=[get_args_parser()])
     opts = parser.parse_args()
     
-    print('Preliminary Mask Decoder Fine-Tuning')
+    print('=== Preliminary Mask Decoder Fine-Tuning ===')
     
     main(opts)
     
