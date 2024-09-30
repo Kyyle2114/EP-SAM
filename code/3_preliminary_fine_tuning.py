@@ -29,13 +29,14 @@ def get_args_parser():
     parser.add_argument('--lr', type=float, default=2e-4, help='initial learning rate')
     parser.add_argument('--weight_decay', type=float, default=1e-3, help='weight decay')
     parser.add_argument('--train_dataset_dir', type=str, default='dataset/camelyon17/train', help='train dataset dir')
+    parser.add_argument('--val_dataset_dir', type=str, default='dataset/camelyon17/val', help='validation dataset dir')
     
     return parser
 
 ### Fine-tuning SAM ###
 def main(opts):
     """
-    Model fine-tuning
+    Preliminary Mask Decoder Fine-Tuning
     
     Returns:
         str: Save path of model checkpoint 
@@ -66,8 +67,8 @@ def main(opts):
     )
     
     val_set = dataset.SegmenterDataset(
-        image_dir=f'dataset',
-        mask_dir=f'dataset',
+        image_dir=f'{opts.val_dataset_dir}/image',
+        mask_dir=f'{opts.val_dataset_dir}/mask',
         transform=None
     )
     
@@ -172,11 +173,9 @@ def main(opts):
         if es.early_stop:
             break    
     
-    ### Evaluation phase ### 
-    
-    ### Generate iter 1 pseudo mask ###
-    
     print(f'Model checkpoint saved at: {save_best_path} \n') 
+    
+    ### Generate pseudo masks ###
     
     return
 

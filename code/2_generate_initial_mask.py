@@ -22,8 +22,8 @@ def get_args_parser():
 
 def main(opts):
     """
-    Model Training 
-
+    Generate Initial Mask
+    
     Args:
         opts (argparser): argparser
         

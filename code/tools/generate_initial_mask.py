@@ -4,8 +4,6 @@ from torchvision.transforms.functional import to_pil_image
 import os
 import numpy as np
 from PIL import Image
-
-import pandas as pd
 from tqdm import tqdm
    
 def generate_initial_mask(
@@ -15,7 +13,7 @@ def generate_initial_mask(
     device
 ):
     """
-    Make pseudo mask using CAM & SAM 
+    Make pseudo mask using enhanced ADL CAM
 
     Args:
         classifier (nn.Module): classifier model 

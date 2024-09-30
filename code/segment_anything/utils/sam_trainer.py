@@ -144,7 +144,7 @@ def model_train(
 
 def model_evaluate(
     model,
-    cls,
+    classifier,
     data_loader,
     criterion,
     device
@@ -154,6 +154,7 @@ def model_evaluate(
 
     Args:
         model (nn.Module): SAM model 
+        classifier (nn.Module): classifier model 
         data_loader (torch.DataLoader): pytorch dataloader
         criterion (list): list of loss functions
         device (str): device 
@@ -164,7 +165,7 @@ def model_evaluate(
 
     # Evaluation
     model.eval()
-    cls.eval()
+    classifier.eval()
     
     with torch.no_grad():
         
@@ -189,7 +190,7 @@ def model_evaluate(
                 original_size = image.shape[1:3]
                 
                 # Bbox from CAM 
-                cam_mask, softmax_cam = cls.generate_cam_masks(
+                cam_mask, softmax_cam = classifier.generate_cam_masks(
                     image=to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()), 
                     device=device
                 )

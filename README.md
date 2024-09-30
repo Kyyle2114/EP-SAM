@@ -16,7 +16,7 @@ We devised a framework that transfers the enhanced knowledge of ADL through expl
 
 ```bash 
 # create a virtual env and activate
-conda create -n wsplf python=3.8
+conda create -n wsplf python=3.10
 conda activate wsplf 
 
 # download packages

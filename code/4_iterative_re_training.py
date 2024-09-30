@@ -31,7 +31,7 @@ def get_args_parser():
 
 def main(opts):
     """
-    Model Training 
+    Iterative Re-Training
 
     Args:
         opts (argparser): argparser

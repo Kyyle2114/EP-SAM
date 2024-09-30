@@ -23,14 +23,14 @@ def get_args_parser():
     parser.add_argument('--lr', type=float, default=1e-5, help='initial learning rate')
     parser.add_argument('--weight_decay', type=float, default=1e-3, help='weight decay')
     parser.add_argument('--train_image_dir', type=str, default='dataset/camelyon17/train/image', help='train dataset image dir')
-    parser.add_argument('--val_image_dir', type=str, default='dataset/camelyon17/val/image', help='valid dataset image dir')
+    parser.add_argument('--val_image_dir', type=str, default='dataset/camelyon17/val/image', help='validation dataset image dir')
     parser.add_argument('--test_image_dir', type=str, default='dataset/camelyon17/test/image', help='test dataset image dir')
     
     return parser
 
 def main(opts):
     """
-    Model Training 
+    Patch Classifier Training
 
     Args:
         opts (argparser): argparser
