@@ -14,6 +14,14 @@ We devised a framework that transfers the enhanced knowledge of ADL through expl
 
 ## Environment
 
+The following describes our experimental setup.
+
+- Ubuntu 22.04.4 LTS
+- 8x Intel(R) Xeon(R) Silver 4112 CPU @ 2.60GHz
+- 2x NVIDIA TITIAN Xp , 12GB
+
+Execute the following cell to set up a virtual environment for running the code.
+
 ```bash 
 # create a virtual env and activate
 conda create -n wsplf python=3.10
@@ -23,11 +31,24 @@ conda activate wsplf
 pip install -r requirements.txt 
 ```
 
+Additional packages such as ASAP are required to extract patches from WSI. Install the following two packages to run the code:
+
+- [OpenSlide](https://openslide.org/download/) 3.4.1 (ASAP 1.8 depends on libopenslide)
+- [ASAP](https://github.com/computationalpathologygroup/ASAP) 1.8 (1.9 does not support the Philips scanner TIFF file format of the Center_4)
+
 ## How to Use 
 
 ### Train
 
-> TBD
+- Move to ```code/``` directory
+
+- Move downloaded datasets to ```dataset/camelyon16``` or ```dataset/camelyon17``` according to their respective dataset types
+
+- Modify the ```DATASET_TYPE``` in ```train.sh``` file to match your downloaded dataset
+
+- Run ```./train.sh```. This will perform everything from patch extraction to model training. Training logs will be saved in ```logging.txt```
+
+- Model weights will be saved in ```code/checkpoints```
 
 ### Inference 
 

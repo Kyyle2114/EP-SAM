@@ -22,9 +22,9 @@ def get_args_parser():
     parser.add_argument('--seed', type=int, default=21, help='random seed')
     parser.add_argument('--sam_model_type', type=str, default='vit_b', help='SAM model type')
     parser.add_argument('--sam_checkpoint', type=str, default='sam_vit_b.pth', help='SAM model checkpoint')
-    parser.add_argument('--epoch', type=int, default=10, help='total epoch')
-    parser.add_argument('--lr', type=float, default=2e-4, help='initial learning rate')
-    parser.add_argument('--weight_decay', type=float, default=1e-3, help='weight decay')
+    parser.add_argument('--epoch', type=int, default=20, help='total epoch')
+    parser.add_argument('--lr', type=float, default=5e-6, help='initial learning rate')
+    parser.add_argument('--weight_decay', type=float, default=1e-2, help='weight decay')
     parser.add_argument('--train_dataset_dir', type=str, default='dataset/camelyon17/train', help='train dataset dir')
     parser.add_argument('--val_dataset_dir', type=str, default='dataset/camelyon17/val', help='validation dataset dir')
     parser.add_argument('--test_dataset_dir', type=str, default='dataset/camelyon17/test', help='test dataset dir')
@@ -221,7 +221,6 @@ if __name__ == '__main__':
     print('=== Iterative Re-Training ===')
     
     for n_iter in range(1, opts.n_iter + 1):
-        
         print(f'Iteraion {n_iter}')
         main(opts, n_iter)
     

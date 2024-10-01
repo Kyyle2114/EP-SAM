@@ -1,3 +1,8 @@
+"""
+Code Reference: https://github.com/jpjuvo/camelyon17-multilevel 
+"""
+
+
 # Take a folder where XML files are located and convert each annotation file into a mask (tumorous areas in white, non-tumorous areas in black)
 import multiresolutionimageinterface as mir
 import cv2
