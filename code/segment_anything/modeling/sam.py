@@ -138,9 +138,9 @@ class Sam(nn.Module):
                 {
                     "masks": masks,
                     "masks_pred": masks_pred,
-                    "gt_mask": image_record['gt_mask'],
-                    "cam_mask": image_record["cam_mask"],
-                    "file_name": image_record["file_name"]
+                    "gt_mask": image_record.get("gt_mask", None),
+                    "cam_mask": image_record.get("cam_mask", None),
+                    "file_name": image_record.get("file_name", None)
                 }
             )
             

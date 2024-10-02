@@ -73,7 +73,6 @@ def main(opts, n_iter):
         train_set, 
         batch_size=opts.batch_size, 
         shuffle=True, 
-        num_workers=opts.num_workers
     )
 
     val_loader = DataLoader(
@@ -175,12 +174,24 @@ def main(opts, n_iter):
         sam.eval()
         for p in sam.parameters():
             p.requires_grad = False
+            
+        train_set = dataset.SegmenterDataset(
+            image_dir=f'{opts.train_dataset_dir}/image',
+            mask_dir=f'{opts.train_dataset_dir}/initial_mask',
+            transform=transform
+        )
+        
+        train_loader = DataLoader(
+            train_set, 
+            batch_size=opts.batch_size, 
+            shuffle=True, 
+        )
         
         generate_sam_mask.generate_sam_mask(
             sam=sam,
             classifier=cls,
             data_loader=train_loader,
-            output_path=f'dataset/{opts.dataset_type}/train',
+            output_path=f'{opts.train_dataset_dir}',
             iter=n_iter,
             device=device
         )
@@ -197,10 +208,22 @@ def main(opts, n_iter):
         for p in sam.parameters():
             p.requires_grad = False
             
+        test_set = dataset.SegmenterDataset(
+            image_dir=f'{opts.test_dataset_dir}/image',
+            mask_dir=f'{opts.test_dataset_dir}/mask',
+            transform=None
+        )
+
+        test_loader = DataLoader(
+            test_set, 
+            batch_size=opts.batch_size, 
+            shuffle=False
+        )
+            
         test_dice_loss, test_iou_loss, test_dice, test_iou = sam_trainer.model_evaluate(
             model=sam,
             classifier=cls,
-            data_loader=val_loader,
+            data_loader=test_loader,
             criterion=[diceloss, iouloss],
             device=device
         )
