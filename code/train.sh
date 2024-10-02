@@ -7,6 +7,8 @@ mv sam_vit_b_01ec64.pth sam_vit_b.pth
 # WSI preprocessing
 DATASET_TYPE=camelyon17 # or camelyon16 
 
+echo DATASET_$DATASET_TYPE >> logging_${DATASET_TYPE}.txt
+
 python3 0_data_preprocess.py \
     --dataset_type $DATASET_TYPE \
 
@@ -19,13 +21,13 @@ python3 1_train_patch_classifier.py \
     --train_image_dir $TRAIN_DATASET_DIR/image \
     --val_image_dir $VAL_DATASET_DIR/image \
     --test_image_dir $TEST_DATASET_DIR/image \
-    >> logging.txt
+    >> logging_${DATASET_TYPE}.txt
 
 # initial mask generation 
 python3 2_generate_initial_mask.py \
     --dataset_type $DATASET_TYPE \
     --train_image_dir $TRAIN_DATASET_DIR/image \
-    >> logging.txt
+    >> logging_${DATASET_TYPE}.txt
 
 # preliminary mask decoder fine-tuning
 SAM_MODEL_TYPE='vit_b'
@@ -36,7 +38,7 @@ python3 3_preliminary_fine_tuning.py \
     --sam_checkpoint $SAM_CHECKPOINT \
     --train_dataset_dir $TRAIN_DATASET_DIR \
     --val_dataset_dir $VAL_DATASET_DIR \
-    >> logging.txt
+    >> logging_${DATASET_TYPE}.txt
 
 # iterative re-training
 python3 4_iterative_re_training.py \
@@ -46,5 +48,5 @@ python3 4_iterative_re_training.py \
     --train_dataset_dir $TRAIN_DATASET_DIR \
     --val_dataset_dir $VAL_DATASET_DIR \
     --test_dataset_dir $TEST_DATASET_DIR \
-    >> logging.txt
+    >> logging_${DATASET_TYPE}.txt
 

@@ -280,7 +280,7 @@ class EarlyStopping:
         self.verbose = verbose
         self.counter = 0
         
-        self.best_score = np.Inf if mode == 'min' else 0
+        self.best_score = np.inf if mode == 'min' else 0
         self.mode = mode
         self.delta = delta
         

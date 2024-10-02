@@ -75,7 +75,6 @@ def main(opts):
         train_set, 
         batch_size=opts.batch_size, 
         shuffle=True, 
-        num_workers=opts.num_workers
     )
 
     val_loader = DataLoader(
@@ -132,7 +131,7 @@ def main(opts):
         last_epoch=-1
     )
     
-    max_loss = np.Inf
+    max_loss = np.inf
     
     ### Training phase ###
     
@@ -191,6 +190,8 @@ def main(opts):
         iter=0,
         device=device
     )
+    
+    print(f'Iter 0 pseudo masks have been generated in dataset/{opts.dataset_type}/train/iter0')
     
     return
 

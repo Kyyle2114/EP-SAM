@@ -68,6 +68,8 @@ def main(opts):
         device=device
     )
     
+    print(f'Inital masks have been generated in dataset/{opts.dataset_type}/train/initial_mask')
+    
     return
     
 if __name__ == '__main__': 

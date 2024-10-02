@@ -20,7 +20,7 @@ def make_point_prompt(
     
     if non_zero_points is None or len(non_zero_points) == 0:
         print("No non-zero points found in the mask.")
-        return np.array([])
+        return np.array([[0, 0]])
 
     # Randomly select 'n_point' points from the list of non-zero points
     selected_points = non_zero_points[np.random.choice(non_zero_points.shape[0], n_point, replace=False)]

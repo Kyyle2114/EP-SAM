@@ -124,7 +124,7 @@ def main(opts, n_iter):
         last_epoch=-1
     )
     
-    max_loss = np.Inf
+    max_loss = np.inf
     
     ### Training phase ###
     
