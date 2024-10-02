@@ -137,9 +137,13 @@ class Sam(nn.Module):
             outputs.append(
                 {
                     "masks": masks,
-                    "masks_pred": masks_pred
+                    "masks_pred": masks_pred,
+                    "gt_mask": image_record['gt_mask'],
+                    "cam_mask": image_record["cam_mask"],
+                    "file_name": image_record["file_name"]
                 }
             )
+            
         return outputs
 
     def postprocess_masks(

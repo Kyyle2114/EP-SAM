@@ -58,10 +58,13 @@ def make_proba_point_prompt(
     valid_indices = np.column_stack(np.where(cam_mask == 1))
     
     # Sample points based on probabilities
-    sampled_indices = np.random.choice(len(valid_indices), size=min(n_point, len(valid_indices)), replace=False, p=valid_probs)
-    
-    random_points = valid_indices[sampled_indices]
-    
+    try:
+        sampled_indices = np.random.choice(len(valid_indices), size=min(n_point, len(valid_indices)), replace=False, p=valid_probs)
+        random_points = valid_indices[sampled_indices]
+        
+    except:
+        random_points = np.array([[0, 0]])
+        
     # Swap x and y coordinates
     random_points = np.fliplr(random_points)
 

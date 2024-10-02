@@ -36,7 +36,7 @@ def generate_sam_mask(
     
     transform = ResizeLongestSide(target_length=sam.image_encoder.img_size)
 
-    for X, y, _, file_name in tqdm(data_loader):
+    for X, y, file_name in tqdm(data_loader):
         X_torch = X.float().permute(0, 3, 1, 2).contiguous().to(device)
         y_torch = y[..., 0].float().to(device)
 
