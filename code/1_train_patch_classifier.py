@@ -22,6 +22,7 @@ def get_args_parser():
     parser.add_argument('--epoch', type=int, default=50, help='total epoch')
     parser.add_argument('--lr', type=float, default=1e-5, help='initial learning rate')
     parser.add_argument('--weight_decay', type=float, default=1e-3, help='weight decay')
+    parser.add_argument('--dataset_type', type=str, default='camelyon17', choices=['camelyon16', 'camelyon17'], help='dataset type')
     parser.add_argument('--train_image_dir', type=str, default='dataset/camelyon17/train/image', help='train dataset image dir')
     parser.add_argument('--val_image_dir', type=str, default='dataset/camelyon17/val/image', help='validation dataset image dir')
     parser.add_argument('--test_image_dir', type=str, default='dataset/camelyon17/test/image', help='test dataset image dir')
@@ -30,17 +31,16 @@ def get_args_parser():
 
 def main(opts):
     """
-    Patch Classifier Training
+    Training Patch Classifier 
 
     Args:
         opts (argparser): argparser
-        
     """
     seed.seed_everything(opts.seed)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
     checkpoint_dir = 'checkpoints'
-    file_name = 'resnet_adl.pth'
+    file_name = f'{opts.dataset_type}_resnet_adl.pth'
     os.makedirs(checkpoint_dir, exist_ok=True)
     save_best_path = os.path.join(checkpoint_dir, file_name)
     

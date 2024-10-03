@@ -64,7 +64,7 @@ class InitialMaskDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
-        return np.array(Image), file_name
+        return np.array(image), file_name
     
     def __len__(self):
         return len(self.data_images)

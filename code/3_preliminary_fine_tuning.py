@@ -16,9 +16,6 @@ from segment_anything.utils import sam_trainer
 from tools import seed, dataset, losses, save_weight, generate_sam_mask
 from patch_classifier import resnet_adl
 
-CHECKPOINT_DIR = 'checkpoints'
-os.makedirs(CHECKPOINT_DIR, exist_ok=True)
-
 def get_args_parser():
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('--batch_size', type=int, default=4, help='batch size allocated to each GPU')
@@ -28,6 +25,7 @@ def get_args_parser():
     parser.add_argument('--epoch', type=int, default=20, help='total epoch')
     parser.add_argument('--lr', type=float, default=5e-6, help='initial learning rate')
     parser.add_argument('--weight_decay', type=float, default=1e-2, help='weight decay')
+    parser.add_argument('--dataset_type', type=str, default='camelyon17', choices=['camelyon16', 'camelyon17'], help='dataset type')
     parser.add_argument('--train_dataset_dir', type=str, default='dataset/camelyon17/train', help='train dataset dir')
     parser.add_argument('--val_dataset_dir', type=str, default='dataset/camelyon17/val', help='validation dataset dir')
     
@@ -45,7 +43,7 @@ def main(opts):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     checkpoint_dir = 'checkpoints'
-    file_name = 'sam_pre_decoder.pth'
+    file_name = f'{opts.dataset_type}_sam_pre_decoder.pth'
     save_best_path = os.path.join(checkpoint_dir, file_name)
     
     ### Dataset & Dataloader ### 
@@ -114,7 +112,7 @@ def main(opts):
         adl_drop_rate=0.75, 
         adl_drop_threshold=0.8
     ).to(device)
-    cls.load_state_dict(torch.load('checkpoints/resnet_adl.pth', map_location=device))
+    cls.load_state_dict(torch.load(f'checkpoints/{opts.dataset_type}_resnet_adl.pth', map_location=device))
     cls.eval()
         
     ### Training config ###  
@@ -191,7 +189,7 @@ def main(opts):
         device=device
     )
     
-    print(f'Iter 0 pseudo masks have been generated in dataset/{opts.dataset_type}/train/iter0')
+    print(f'Iter 0 pseudo masks have been generated in dataset/{opts.dataset_type}/train/iter_0')
     
     return
 

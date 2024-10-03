@@ -46,7 +46,7 @@ def main(opts):
 
     ### Model config ### 
     
-    classifier_path = 'checkpoints/resnet_adl.pth'
+    classifier_path = f'checkpoints/{opts.dataset_type}_resnet_adl.pth'
     cls = resnet_adl.resnet50_adl(
         architecture_type='adl', 
         pretrained=False, 

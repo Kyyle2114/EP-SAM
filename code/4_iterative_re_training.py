@@ -25,6 +25,7 @@ def get_args_parser():
     parser.add_argument('--epoch', type=int, default=20, help='total epoch')
     parser.add_argument('--lr', type=float, default=5e-6, help='initial learning rate')
     parser.add_argument('--weight_decay', type=float, default=1e-2, help='weight decay')
+    parser.add_argument('--dataset_type', type=str, default='camelyon17', choices=['camelyon16', 'camelyon17'], help='dataset type')
     parser.add_argument('--train_dataset_dir', type=str, default='dataset/camelyon17/train', help='train dataset dir')
     parser.add_argument('--val_dataset_dir', type=str, default='dataset/camelyon17/val', help='validation dataset dir')
     parser.add_argument('--test_dataset_dir', type=str, default='dataset/camelyon17/test', help='test dataset dir')
@@ -43,7 +44,7 @@ def main(opts, n_iter):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     checkpoint_dir = 'checkpoints'
-    file_name = f'decoder_iter{n_iter}.pth'
+    file_name = f'{opts.dataset_type}_decoder_iter{n_iter}.pth'
     save_best_path = os.path.join(checkpoint_dir, file_name)
     
     ### Dataset & Dataloader ### 
@@ -106,7 +107,7 @@ def main(opts, n_iter):
         adl_drop_rate=0.75, 
         adl_drop_threshold=0.8
     ).to(device)
-    cls.load_state_dict(torch.load('checkpoints/resnet_adl.pth', map_location=device))
+    cls.load_state_dict(torch.load(f'checkpoints/{opts.dataset_type}_resnet_adl.pth', map_location=device))
     cls.eval()
         
     ### Training config ###  

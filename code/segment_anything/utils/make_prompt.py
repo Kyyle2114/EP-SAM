@@ -19,7 +19,7 @@ def make_point_prompt(
     non_zero_points = cv2.findNonZero(mask)
     
     if non_zero_points is None or len(non_zero_points) == 0:
-        print("No non-zero points found in the mask.")
+        # print("No non-zero points found in the mask.")
         return np.array([[0, 0]])
 
     # Randomly select 'n_point' points from the list of non-zero points

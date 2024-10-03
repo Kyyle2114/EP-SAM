@@ -18,6 +18,7 @@ VAL_DATASET_DIR=dataset/$DATASET_TYPE/val
 TEST_DATASET_DIR=dataset/$DATASET_TYPE/test
 
 python3 1_train_patch_classifier.py \
+    --dataset_type $DATASET_TYPE \
     --train_image_dir $TRAIN_DATASET_DIR/image \
     --val_image_dir $VAL_DATASET_DIR/image \
     --test_image_dir $TEST_DATASET_DIR/image \
@@ -34,6 +35,7 @@ SAM_MODEL_TYPE='vit_b'
 SAM_CHECKPOINT='sam_vit_b.pth'
 
 python3 3_preliminary_fine_tuning.py \
+    --dataset_type $DATASET_TYPE \
     --sam_model_type $SAM_MODEL_TYPE \
     --sam_checkpoint $SAM_CHECKPOINT \
     --train_dataset_dir $TRAIN_DATASET_DIR \
@@ -43,6 +45,7 @@ python3 3_preliminary_fine_tuning.py \
 # iterative re-training
 python3 4_iterative_re_training.py \
     --n_iter 3 \
+    --dataset_type $DATASET_TYPE \
     --sam_model_type $SAM_MODEL_TYPE \
     --sam_checkpoint $SAM_CHECKPOINT \
     --train_dataset_dir $TRAIN_DATASET_DIR \

@@ -31,9 +31,8 @@ conda activate wsplf
 pip install -r requirements.txt 
 ```
 
-Additional packages such as ASAP are required to extract patches from WSI. Install the following two packages to run the code:
+Additional package is required to extract patches from WSI. Install the following package to run the code:
 
-- [OpenSlide](https://openslide.org/download/) 3.4.1 (ASAP 1.8 depends on libopenslide)
 - [ASAP](https://github.com/computationalpathologygroup/ASAP) 1.8 (1.9 does not support the Philips scanner TIFF file format of the Center_4)
 
 ## How to Use 
@@ -43,20 +42,31 @@ Additional packages such as ASAP are required to extract patches from WSI. Insta
 - Move to ```code/``` directory
 
 - Move downloaded datasets to ```dataset/camelyon16``` or ```dataset/camelyon17``` according to their respective dataset types
+  - For the dataset structure required for model training, please refer to this [guide](code/dataset/README.md)
 
 - Modify the ```DATASET_TYPE``` in ```train.sh``` file to match your downloaded dataset
 
-- Run ```./train.sh```. This will perform everything from patch extraction to model training. Training logs will be saved in ```logging.txt```
+- Run ```./train.sh```. This will perform everything from patch extraction to model training. Training logs will be saved in ```logging_{DATASET_TYPE}.txt```
 
 - Model weights will be saved in ```code/checkpoints```
 
 ### Inference 
 
-> TBD
+- Move to ```code/``` directory
+
+- Configure the inference settings in ```infer.sh```
+  - Set ```TEST_DATASET_DIR``` to your target dataset path
+  - Set model weight paths (```RESNET_CHECKPOINT``` for the ResNet model,
+```SAM_DECODER_CHECKPOINT``` for the SAM decoder)
+
+- Run ```./infer.sh```. Inference results will be logged to ```logging_inference.txt```.
+
 
 ## Dataset
 
-We utilized two open public breast cancer WSI datasets: Camelyon16 & Camelyon17. 
+We utilized two open public breast cancer WSI datasets: **Camelyon16** & **Camelyon17**. 
+
+Find detailed dataset descriptions in the links below. For download instructions and other details, see [here](code/dataset/README.md).
 
 ### Camelyon16
 
