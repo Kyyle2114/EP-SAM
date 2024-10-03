@@ -1,4 +1,7 @@
-#
+# datasets
+!code/dataset/*
+
+# DS_Store (Mac)
 .DS_Store
 
 # Byte-compiled / optimized / DLL files

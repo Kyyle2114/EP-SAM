@@ -34,6 +34,7 @@ pip install -r requirements.txt
 Additional package is required to extract patches from WSI. Install the following package to run the code:
 
 - [ASAP](https://github.com/computationalpathologygroup/ASAP) 1.8 (1.9 does not support the Philips scanner TIFF file format of the Center_4)
+  - Download and install ```ASAP-1.8-python36-Linux.deb```. This will install ```multiresolutionimageinterface.py``` file to ```/opt/ASAP/bin```.
 
 ## How to Use 
 

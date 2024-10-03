@@ -363,7 +363,6 @@ def CreateDF_Camelyon17(dirData, dirHome, tifPath, overrideExisting=False):
     df = pd.DataFrame(columns=[
         'patchId',
         'fileName',
-        'center',
         'patient',
         'node',
         'centerX',
@@ -374,7 +373,6 @@ def CreateDF_Camelyon17(dirData, dirHome, tifPath, overrideExisting=False):
     
     # If the directory is different, it needs to be changed.
     split = tifPath.split('/')
-    cnt = int(split[-3].strip('center_'))
     splitpatient = split[-1].split('_')
     patient = int(splitpatient[1])
     node = int(splitpatient[3].strip('.tif'))
@@ -387,7 +385,6 @@ def CreateDF_Camelyon17(dirData, dirHome, tifPath, overrideExisting=False):
         df = df.append({
             'patchId': str(patient) + str(node).zfill(3) + '_' + str(patient) + str(0) + str(c[0]).zfill(7) + str(c[1]).zfill(7),
             'fileName': tifPath,
-            'center': cnt,
             'patient': patient,
             'node': node,
             'centerX':c[0],

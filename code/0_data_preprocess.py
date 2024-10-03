@@ -36,12 +36,12 @@ def main(opts):
     
     if opts.dataset_type == 'camelyon16':
         dirAnnotations = f'dataset/{opts.dataset_type}/annotations'
-        dirData = f'dataset/{opts.dataset_type}/raw_data'
+        dirData = f'dataset/{opts.dataset_type}/images'
         dirHome = f'dataset/{opts.dataset_type}'
         
     elif opts.dataset_type == 'camelyon17':
-        dirAnnotations = f'dataset/{opts.dataset_type}/data/annotations'
-        dirData = f'dataset/{opts.dataset_type}/data/training'
+        dirAnnotations = f'dataset/{opts.dataset_type}/annotations'
+        dirData = f'dataset/{opts.dataset_type}/images'
         dirHome = f'dataset/{opts.dataset_type}'
     
     ImageFiles = []
