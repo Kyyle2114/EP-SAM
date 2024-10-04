@@ -39,7 +39,7 @@ def main(opts):
         dirData = f'dataset/{opts.dataset_type}/images'
         dirHome = f'dataset/{opts.dataset_type}'
         
-    elif opts.dataset_type == 'camelyon17':
+    if opts.dataset_type == 'camelyon17':
         dirAnnotations = f'dataset/{opts.dataset_type}/annotations'
         dirData = f'dataset/{opts.dataset_type}/images'
         dirHome = f'dataset/{opts.dataset_type}'
@@ -93,7 +93,7 @@ def main(opts):
                     tifPath=file_path
                 )
                 
-            elif opts.dataset_type == 'camelyon17':
+            if opts.dataset_type == 'camelyon17':
                 CreateDF_Camelyon17(
                     dirData=dirData,
                     dirHome=dirHome,
@@ -117,7 +117,6 @@ def main(opts):
         merged_df = pd.concat(dfs, axis=0, ignore_index=True)
         merged_df = merged_df.drop('Unnamed: 0', axis=1)
         merged_df['wsi_id'] = merged_df['patchId'].apply(lambda x: x.split('_')[0])
-        merged_df = merged_df[(merged_df['tumorPercentage'] > 20) & (merged_df['tumorPercentage'] < 90)]
         
         train_comb = [
             '061', '018', '039', '031', '035', '051', '064', '040', '030', '007', 
@@ -134,7 +133,7 @@ def main(opts):
             '020' ,'003', '026','029' ,'017'
         ]
     
-    elif opts.dataset_type == 'camelyon17':
+    if opts.dataset_type == 'camelyon17':
         for filename in os.listdir(directory):
             if filename.endswith('.csv'):
                 parts = filename.split('_')
@@ -146,7 +145,6 @@ def main(opts):
         merged_df = pd.concat(dfs, axis=0, ignore_index=True)
         merged_df = merged_df.drop('Unnamed: 0', axis=1)
         merged_df['wsi_id'] = merged_df['patchId'].apply(lambda x: x.split('_')[0])
-        merged_df = merged_df[(merged_df['tumorPercentage'] > 20) & (merged_df['tumorPercentage'] < 90)]
         
         train_comb = [
             '241', '512', '204', '224', '444', '481', '423', '603', '674',
@@ -168,12 +166,12 @@ def main(opts):
     df_train_copy['range'] = pd.cut(df_train_copy['tumorPercentage'], bins, right=False)
     
     def sample_per_group(x):
-        # 데이터셋마다 숫자가 다른 이유는? - 이 부분 물어볼 것 
         n_samples = 430 if opts.dataset_type == 'camelyon16' else 500
         return x.sample(n=min(len(x), n_samples), random_state=42) if len(x) > 0 else x
 
     df_train_sampled = df_train_copy.groupby('range', as_index=False, observed=True).apply(sample_per_group).reset_index(drop=True)
     df_train_sampled.drop('range', axis=1, inplace=True)
+    df_train_sampled = df_train_sampled[(df_train_sampled['tumorPercentage'] > 20) & (df_train_sampled['tumorPercentage'] < 90)]
     df_train_sampled.to_csv(dirHome + '/sample_patches_train.csv', index=False)
     
     # Training - negative set 
@@ -187,12 +185,11 @@ def main(opts):
     df_valid_copy['range'] = pd.cut(df_valid_copy['tumorPercentage'], bins, right=False)
 
     def sample_per_group(x):
-        n_samples = 50 # 두 데이터 모두 50으로 동일?
+        n_samples = 50 
         return x.sample(n=min(len(x), n_samples), random_state=42) if len(x) > 0 else x
 
     df_valid_sampled = df_valid_copy.groupby('range', as_index=False, observed=True).apply(sample_per_group).reset_index(drop=True)
-    
-    # 왜 17만 if block 실행하는지 물어볼 것 
+     
     if opts.dataset_type == 'camelyon17':
         shortfall = 1000 - len(df_valid_sampled)
         if shortfall > 0:
@@ -200,6 +197,7 @@ def main(opts):
             df_valid_sampled = pd.concat([df_valid_sampled, additional_samples])
     
     df_valid_sampled.drop('range', axis=1, inplace=True)
+    df_valid_sampled = df_valid_sampled[(df_valid_sampled['tumorPercentage'] > 20) & (df_valid_sampled['tumorPercentage'] < 90)]
     df_valid_sampled.to_csv(dirHome + '/sample_patches_valid.csv', index=False)
     
     # Valid - negative set
@@ -208,18 +206,24 @@ def main(opts):
     df_valid_neg.to_csv(dirHome + '/sample_patches_negative_valid.csv', index=False)   
     
     # Test - positive set
-    # 16 코드를 기준으로 작성 .. 17에서도 문제 없는지 확인 필요 
-    df_test_copy = df_test.copy()
-    bins = np.arange(0, 105, 5)
-    df_test_copy['range'] = pd.cut(df_test_copy['tumorPercentage'], bins, right=False)
+    if opts.dataset_type == 'camelyon16':
+        df_test_copy = df_test.copy()
+        bins = np.arange(0, 105, 5)
+        df_test_copy['range'] = pd.cut(df_test_copy['tumorPercentage'], bins, right=False)
 
-    def sample_per_group(x):
-        n_samples = 143 if opts.dataset_type == 'camelyon16' else 100 # 16 코드 참고해서 구현, 17의 경우 n_samples 몇으로 해야 하는지?  
-        return x.sample(n=min(len(x), n_samples), random_state=42) if len(x) > 0 else x
+        def sample_per_group(x):
+            n_samples = 143 
+            return x.sample(n=min(len(x), n_samples), random_state=42) if len(x) > 0 else x
 
-    df_test_sampled = df_test_copy.groupby('range', as_index=False, observed=True).apply(sample_per_group).reset_index(drop=True)
-    df_test_sampled.drop('range', axis=1, inplace=True)
-    df_test_sampled.to_csv(dirHome + '/sample_patches_test.csv', index=False)
+        df_test_sampled = df_test_copy.groupby('range', as_index=False, observed=True).apply(sample_per_group).reset_index(drop=True)
+        df_test_sampled.drop('range', axis=1, inplace=True)
+        df_test_sampled = df_test_sampled[(df_test_sampled['tumorPercentage'] > 20) & (df_test_sampled['tumorPercentage'] < 90)]
+        df_test_sampled.to_csv(dirHome + '/sample_patches_test.csv', index=False)
+
+    if opts.dataset_type == 'camelyon17':
+        df_test_sampled = df_test[(df_test['tumorPercentage'] >= 20) & (df_test['tumorPercentage'] <= 90)]
+        df_test_sampled = df_test_sampled.sample(n=2000, random_state=42)
+        df_test_sampled.to_csv(dirHome + '/sample_patches_test.csv', index=False)
 
     # Test - negative set
     df_test_neg_all = merged_df[(merged_df['wsi_id'].isin(test_comb)) & (merged_df['isTumor'] == False)]
@@ -232,7 +236,10 @@ def main(opts):
     df_valid = pd.read_csv(dirHome + '/sample_patches_valid.csv')
     df_test = pd.read_csv(dirHome + '/sample_patches_test.csv')
     
-    # 16 코드의 df_train['wsi_id'] = df_train['patchId'].apply(lambda x: x.split('_')[0]) 부분은 제거했는데, 왜 필요한지 ? 
+    if opts.dataset_type == 'camelyon16':
+        df_train['wsi_id'] = df_train['patchId'].apply(lambda x: x.split('_')[0])
+        df_valid['wsi_id'] = df_valid['patchId'].apply(lambda x: x.split('_')[0])
+        df_test['wsi_id'] = df_test['patchId'].apply(lambda x: x.split('_')[0])
     
     # Extract positive patches
     dirRoot = f'dataset/{opts.dataset_type}'
@@ -255,7 +262,11 @@ def main(opts):
     df_valid_neg = pd.read_csv(dirHome + '/sample_patches_negative_valid.csv')
     df_test_neg = pd.read_csv(dirHome + '/sample_patches_negative_test.csv')
     
-    # 마찬가지로 16 코드의 df_train['patchId'].apply(lambda x: x.split('_')[0]) 부분은 제거했는데, 왜 필요한지 ? 
+    if opts.dataset_type == 'camelyon16':
+        df_train['wsi_id'] = df_train['patchId'].apply(lambda x: x.split('_')[0])
+        df_valid['wsi_id'] = df_valid['patchId'].apply(lambda x: x.split('_')[0])
+        df_test['wsi_id'] = df_test['patchId'].apply(lambda x: x.split('_')[0])
+    
     df_list = [df_train_neg, df_valid_neg, df_test_neg]
     dirName_list = ['train', 'val', 'test']
     levels = [0]

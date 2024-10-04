@@ -416,7 +416,7 @@ def ExtractPatches(
         if dataset_type == 'camelyon16':
             wsi_id = split[-1].split('_')[1].split('.')[0]
         
-        elif dataset_type == 'camelyon17':
+        if dataset_type == 'camelyon17':
             splitpatient = split[-1].split('_')
             patient = int(splitpatient[1])
             node = int(splitpatient[3].strip('.tif'))
@@ -426,7 +426,7 @@ def ExtractPatches(
             if dataset_type == 'camelyon16':
                 df_sub = df[df.wsi_id == wsi_id]
             
-            elif dataset_type == 'camelyon17':
+            if dataset_type == 'camelyon17':
                 df_sub = df[(df.patient == patient) & (df.node == node)]
 
             for i in range(len(df_sub)):

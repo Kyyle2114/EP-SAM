@@ -6,12 +6,12 @@ You can download the datasets using [AWS CLI](https://aws.amazon.com/cli/?nc1=h_
 cd code
 
 # camelyon16
-aws s3 cp --no-sign-request s3://camelyon-dataset/CAMELYON16/images/ dataset/camelyon16/images/ –recursive
-aws s3 cp --no-sign-request s3://camelyon-dataset/CAMELYON16/annotations/ dataset/camelyon16/annotations/ –recursive
+aws s3 cp --no-sign-request s3://camelyon-dataset/CAMELYON16/images/ dataset/camelyon16/images/ --recursive
+aws s3 cp --no-sign-request s3://camelyon-dataset/CAMELYON16/annotations/ dataset/camelyon16/annotations/ --recursive
 
 # camelyon17
-aws s3 cp --no-sign-request s3://camelyon-dataset/CAMELYON17/images/ dataset/camelyon17/images/ –recursive
-aws s3 cp --no-sign-request s3://camelyon-dataset/CAMELYON17/annotations/ dataset/camelyon17/annotations/ –recursive
+aws s3 cp --no-sign-request s3://camelyon-dataset/CAMELYON17/images/ dataset/camelyon17/images/ --recursive
+aws s3 cp --no-sign-request s3://camelyon-dataset/CAMELYON17/annotations/ dataset/camelyon17/annotations/ --recursive
 ```
 
 # Dataset structure (WSI preprocessing)
