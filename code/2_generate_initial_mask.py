@@ -65,10 +65,12 @@ def main(opts):
         classifier=cls,
         data_loader=train_loader,
         output_path=f'dataset/{opts.dataset_type}/train',
-        device=device
+        device=device,
+        dataset_type=opts.dataset_type
     )
     
-    print(f'Inital masks have been generated in dataset/{opts.dataset_type}/train/initial_mask')
+    print()
+    print(f'Inital masks have been generated in dataset/{opts.dataset_type}/train/initial_mask \n')
     
     return
     

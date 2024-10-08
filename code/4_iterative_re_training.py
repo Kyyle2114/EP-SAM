@@ -143,7 +143,8 @@ def main(opts, n_iter):
             classifier=cls,
             data_loader=val_loader,
             criterion=[diceloss, iouloss],
-            device=device
+            device=device,
+            dataset_type=opts.dataset_type
         )
         
         val_loss = val_dice_loss + val_iou_loss
@@ -194,7 +195,8 @@ def main(opts, n_iter):
             data_loader=train_loader,
             output_path=f'{opts.train_dataset_dir}',
             iter=n_iter,
-            device=device
+            device=device,
+            dataset_type=opts.dataset_type
         )
     
     ### Final Evaluation (Test Dataset) ###  
@@ -226,9 +228,11 @@ def main(opts, n_iter):
             classifier=cls,
             data_loader=test_loader,
             criterion=[diceloss, iouloss],
-            device=device
+            device=device,
+            dataset_type=opts.dataset_type
         )
         
+        print('=== Test Evaluation ===')
         print('Test Dice Loss: %s'%test_dice_loss)
         print('Test IoU Loss: %s'%test_iou_loss)
         print('Test Dice: %s'%test_dice)
@@ -245,7 +249,7 @@ if __name__ == '__main__':
     print('=== Iterative Re-Training ===')
     
     for n_iter in range(1, opts.n_iter + 1):
-        print(f'Iteraion {n_iter}')
+        print(f'# Iteration {n_iter}')
         main(opts, n_iter)
     
     print('=== DONE === \n')    

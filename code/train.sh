@@ -7,8 +7,6 @@ mv sam_vit_b_01ec64.pth sam_vit_b.pth
 # WSI preprocessing
 DATASET_TYPE=camelyon17 # or camelyon16 
 
-echo DATASET_$DATASET_TYPE >> logging_${DATASET_TYPE}.txt
-
 python3 0_data_preprocess.py \
     --dataset_type $DATASET_TYPE \
 

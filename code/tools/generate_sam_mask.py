@@ -15,7 +15,8 @@ def generate_sam_mask(
     data_loader,
     output_path,
     iter,
-    device
+    device,
+    dataset_type
 ):
     """
     Make pseudo mask using enhance ADL CAM & SAM 
@@ -27,6 +28,7 @@ def generate_sam_mask(
         output_path (str): save path 
         iter (int): number of iteration
         device (str): device 
+        dataset_type (str): dataset type (camelyon16 or camelyon17)
     """
     save_dir = f'{output_path}/iter_{iter}'
     os.makedirs(save_dir, exist_ok=True)
@@ -48,7 +50,8 @@ def generate_sam_mask(
             
             cam_mask, normalized_cam = classifier.generate_cam_masks(
                 image=to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()), 
-                device=device
+                device=device,
+                dataset_type=dataset_type
             )
 
             # SAM input 

@@ -148,7 +148,8 @@ def main(opts):
             classifier=cls,
             data_loader=val_loader,
             criterion=[diceloss, iouloss],
-            device=device
+            device=device,
+            dataset_type=opts.dataset_type
         )
         
         val_loss = val_dice_loss + val_iou_loss
@@ -186,7 +187,8 @@ def main(opts):
         data_loader=train_loader,
         output_path=f'{opts.train_dataset_dir}',
         iter=0,
-        device=device
+        device=device,
+        dataset_type=opts.dataset_type
     )
     
     print(f'Iter 0 pseudo masks have been generated in dataset/{opts.dataset_type}/train/iter_0')

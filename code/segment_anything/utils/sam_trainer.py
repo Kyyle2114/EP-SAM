@@ -147,7 +147,8 @@ def model_evaluate(
     classifier,
     data_loader,
     criterion,
-    device
+    device,
+    dataset_type
 ) -> Tuple[float, float, float, float]:
     """
     Evaluate the model
@@ -158,6 +159,7 @@ def model_evaluate(
         data_loader (torch.DataLoader): pytorch dataloader
         criterion (list): list of loss functions
         device (str): device 
+        dataset_type (str): dataset type (camelyon16 or camelyon17)
 
     Returns:
         Tuple[float, float, float, float]: average losses(dice, iou), metrics(dice, iou)
@@ -192,7 +194,8 @@ def model_evaluate(
                 # Bbox from CAM 
                 cam_mask, softmax_cam = classifier.generate_cam_masks(
                     image=to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()), 
-                    device=device
+                    device=device,
+                    dataset_type=dataset_type
                 )
                 
                 image = transform.apply_image(image)

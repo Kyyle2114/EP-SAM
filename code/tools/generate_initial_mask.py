@@ -10,7 +10,8 @@ def generate_initial_mask(
     classifier,
     data_loader,
     output_path,
-    device
+    device,
+    dataset_type
 ):
     """
     Make pseudo mask using enhanced ADL CAM
@@ -20,6 +21,7 @@ def generate_initial_mask(
         data_loader (torch.DataLoader): pytorch dataloader
         output_path (str): save path 
         device (str): device 
+        dataset_type (str): dataset type (camelyon16 or camelyon17)
     """
     save_dir = f'{output_path}/initial_mask'
     os.makedirs(save_dir, exist_ok=True)
@@ -33,7 +35,8 @@ def generate_initial_mask(
                 
             cam_mask, _ = classifier.generate_cam_masks(
                 image=to_pil_image(torch.as_tensor(image, dtype=torch.uint8).squeeze()),
-                device=device
+                device=device,
+                dataset_type=dataset_type
             )
             
             cam_mask = Image.fromarray(np.uint8(cam_mask))

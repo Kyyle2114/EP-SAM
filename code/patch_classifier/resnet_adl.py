@@ -181,7 +181,8 @@ class ResNetAdl(nn.Module):
     def generate_cam_masks(
         self,
         image: Image,
-        device: str
+        device: str,
+        dataset_type: str
     ) -> Tuple[np.array, np.array]:
         """
         Make CAM with rotation & morphologyEx
@@ -189,6 +190,7 @@ class ResNetAdl(nn.Module):
         Args:
             image (PIL.Image): input image 
             device (str): device
+            dataset_type (str): dataset type (camelyon16 or camelyon17)
 
         Returns:
             Tupe[np.array, np.array]: cam mask, normalized cam mask
@@ -240,16 +242,23 @@ class ResNetAdl(nn.Module):
         non_zero_values = avg_cam[avg_cam != 0]
         
         if len(non_zero_values) > 0:
-            percentile_thres = np.percentile(non_zero_values, 20)
+            threshold = 10 if dataset_type == 'camelyon16' else 30
+            percentile_thres = np.percentile(non_zero_values, threshold)
             avg_cam = np.where(avg_cam > percentile_thres, 1, 0).astype(np.uint8)
             
         else:
             avg_cam = np.zeros_like(avg_cam, dtype=np.uint8)
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5, 5))
-        avg_cam = cv2.morphologyEx(avg_cam, cv2.MORPH_OPEN, kernel)
-        avg_cam = cv2.resize(avg_cam, (image.size[0], image.size[1]), cv2.INTER_LANCZOS4) 
-
+        if dataset_type == 'camelyon16':
+            avg_cam = cv2.resize(avg_cam, (image.size[0], image.size[1]), cv2.INTER_LANCZOS4)
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 21))
+            avg_cam = cv2.morphologyEx(avg_cam, cv2.MORPH_OPEN, kernel)
+            
+        if dataset_type == 'camelyon17':
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+            avg_cam = cv2.morphologyEx(avg_cam, cv2.MORPH_OPEN, kernel)
+            avg_cam = cv2.resize(avg_cam, (image.size[0], image.size[1]), cv2.INTER_LANCZOS4)
+        
         avg_cam[avg_cam != 0] = 1
                 
         return avg_cam, normalized_cam
