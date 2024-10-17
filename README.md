@@ -1,4 +1,4 @@
-# Weakly Supervised Pseudo-labeling Framework for Breast Cancer Segmentation based on SAM: Leveraging Prompts for Effective Knowledge Transfer
+# Enhanced Prompt-leveraged Weakly Supervised Cancer Segmentation based on Segment Anything
 
 Joonhyeon Song, Seohwan Yun, Seongho Yoon, Joohyeok Kim, Sangmin Lee by Kwangwoon University and QI LAB. 
 
