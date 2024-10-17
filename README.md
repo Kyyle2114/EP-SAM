@@ -18,7 +18,7 @@ The following describes our experimental setup.
 
 - Ubuntu 22.04.4 LTS
 - 8x Intel(R) Xeon(R) Silver 4112 CPU @ 2.60GHz
-- 2x NVIDIA TITIAN Xp , 12GB
+- 1x NVIDIA TITIAN Xp , 12GB
 
 Execute the following cell to set up a virtual environment for running the code.
 
