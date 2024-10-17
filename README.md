@@ -24,8 +24,8 @@ Execute the following cell to set up a virtual environment for running the code.
 
 ```bash 
 # create a virtual env and activate
-conda create -n wsplf python=3.10
-conda activate wsplf 
+conda create -n EPLC_SAM python=3.10
+conda activate EPLC_SAM 
 
 # download packages
 pip install -r requirements.txt 
