@@ -78,3 +78,8 @@ Find detailed dataset descriptions in the links below. For download instructions
 ### Camelyon17
 
 - [Dataset link](https://camelyon17.grand-challenge.org/)
+
+
+### Contact
+
+- Email: thdwnsgus0706@gmail.com
