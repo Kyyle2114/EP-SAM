@@ -1,4 +1,4 @@
-# EPLC-SAM: Enhanced Prompt-leveraged Weakly Supervised Cancer Segmentation based on Segment Anything
+# EP-SAM: Weakly Supervised Histopathology Segmentation via Enhanced Prompt with Segment Anything
 
 Joonhyeon Song, Seohwan Yun, Seongho Yoon, Joohyeok Kim, Sangmin Lee by Kwangwoon University and QI LAB. 
 
