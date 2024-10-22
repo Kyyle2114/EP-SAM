@@ -1,5 +1,8 @@
 Legal Notice
 
-This software and its associated documentation are provided under the terms of the Attribution-NonCommercial-ShareAlike 4.0 International License. Additionally, this software incorporates technology for which a patent application has been filed with the Korean Intellectual Property Office (KIPO) under application No.10-2024-0117533 by Joonhyeon Song, QI LAB.
+This software and its associated documentation are provided under the terms of the Attribution-NonCommercial-ShareAlike 4.0 International License. 
+Additionally, this software incorporates technology for which a patent application has been filed with the Korean Intellectual Property Office (KIPO) 
+under application No.10-2024-0117533 by Joonhyeon Song, QI LAB.
 
-Use of this technology in commercial applications and certain other circumstances is subject to the limitations as set forth in the patent application. Anyone wishing to use this technology in commercial ways is advised to contact the patent applicant to obtain a license.
+Use of this technology in commercial applications and certain other circumstances is subject to the limitations as set forth in the patent application. 
+Anyone wishing to use this technology in commercial ways is advised to contact the patent applicant to obtain a license.
