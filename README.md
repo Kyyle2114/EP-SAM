@@ -26,8 +26,8 @@ Execute the following cell to set up a virtual environment for running the code.
 
 ```bash 
 # create a virtual env and activate
-conda create -n EPLC_SAM python=3.10
-conda activate EPLC_SAM 
+conda create -n EP_SAM python=3.10
+conda activate EP_SAM 
 
 # download packages
 pip install -r requirements.txt 
@@ -78,8 +78,3 @@ Find detailed dataset descriptions in the links below. For download instructions
 ### Camelyon17
 
 - [Dataset link](https://camelyon17.grand-challenge.org/)
-
-
-### Contact
-
-- Email: thdwnsgus0706@gmail.com
