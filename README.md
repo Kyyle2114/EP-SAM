@@ -42,28 +42,21 @@ Additional package is required to extract patches from WSI. Install the followin
 
 ### Train
 
-- Move to ```code/``` directory
+```bash
 
-- Move downloaded datasets to ```dataset/camelyon16``` or ```dataset/camelyon17``` according to their respective dataset types
-  - For the dataset structure required for model training, please refer to this [guide](code/dataset/README.md)
+cd code/camelyon16 # Move dataset directory and download Camelyon16bdatasets
+cd ../camelyon17 # Move dataset directory and download Camelyon16bdatasets
+cd ../train.sh
 
-- Modify the ```DATASET_TYPE``` in ```train.sh``` file to match your downloaded dataset
-
-- Run ```./train.sh```. This will perform everything from patch extraction to model training. Training logs will be saved in ```logging_{DATASET_TYPE}.txt```
-
-- Model weights will be saved in ```code/checkpoints```
+```
 
 ### Inference 
 
-- Move to ```code/``` directory
+```bash
 
-- Configure the inference settings in ```infer.sh```
-  - Set ```TEST_DATASET_DIR``` to your target dataset path
-  - Set model weight paths (```RESNET_CHECKPOINT``` for the ResNet model,
-```SAM_DECODER_CHECKPOINT``` for the SAM decoder)
+cd code/infer.sh
 
-- Run ```./infer.sh```. Inference results will be logged to ```logging_inference.txt```.
-
+```
 
 ## Dataset
 
